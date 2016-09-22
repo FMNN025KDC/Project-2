@@ -15,14 +15,26 @@ class InexactLineSearch(Optimizer):
         self.tau = tau
         self.xi = xi
 #        self.alpha = 1
-        self.alpha_U = 1e99
-        self.alpha_L = 0
+#        self.alpha_U = 1e99
+#        self.alpha_L = 0
         
     def getAlpha(self,x_k,s_k):
+        alpha_U = 1e99
+        alpha_L = 0
+        alpha_0 = 1
+        
         func_alpha = self.function_alpha(x_k,s_k)
         grad_alpha = super().calculateGradient(func_alpha)
 #        grad_alpha = fgradient_alpha(x_k,s_k)
 #        return grad_alpha
+        LC,RC = self.goldsteinCondition(alpha_0,alpha_U,alpha_L,func_alpha,grad_alpha)
+        
+        while (not (LC and RC)):
+            if (not LC):
+                Dalpha_0 = (alpha_0 - alpha_L) * \ 
+                    grad_alpha(alpha_0) / (grad_alpha(alpha_L) - grad_alpha(alpha_0))
+                Dalpha_0 = max(Dalpha_0, self.tau * (alpha_0 - alpha_L))
+            else:
         
         
     
@@ -39,11 +51,17 @@ class InexactLineSearch(Optimizer):
 #        return grad_alpha
         
         
-    def goldsteinCondition(self,alpha_0,func_alpha,grad_alpha):
-        LC = (func_alpha(alpha_0) >= func_alpha(self.alpha_L) + \
-            (1 - self.rho) * (alpha_0 - self.alpha_L) * grad_alpha(self.alpha_L))
-        RC = (func_alpha(alpha_0) <= func_alpha(self.alpha_L) + \
-        self.rho*(alpha_0 - alpha_L))
+    def goldsteinCondition(self,alpha_0,alpha_U,alpha_L,func_alpha,grad_alpha):
+        LC = (func_alpha(alpha_0) >= func_alpha(alpha_L) + \
+            (1 - self.rho) * (alpha_0 - alpha_L) * grad_alpha(alpha_L))
+        RC = (func_alpha(alpha_0) <= func_alpha(alpha_L) + \
+            self.rho*(alpha_0 - alpha_L)*grad_alpha(alpha_L))
+        
+        return (LC[0],RC[0])
+#        LC = (func_alpha(alpha_0) >= func_alpha(self.alpha_L) + \
+#            (1 - self.rho) * (alpha_0 - self.alpha_L) * grad_alpha(self.alpha_L))
+#        RC = (func_alpha(alpha_0) <= func_alpha(self.alpha_L) + \
+#        self.rho*(alpha_0 - alpha_L))
 #        LC = (self.function(alpha_0) >= self.function(self.alpha_L) \
 #            + (1 - self.rho) * (alpha_0 - self.alpha_L) * self.fgradient(alpha_L))
 #        RC = (self.function(alpha_0) <= self.function(alpha_L) \
