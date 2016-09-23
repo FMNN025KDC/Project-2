@@ -67,7 +67,7 @@ class Optimizer():
     def inexactLineSearch(self,x_k,s_k):
         alpha_U = 1e99
         alpha_L = 0
-        alpha_0 = 1
+        alpha_0 = 100
         
         func_alpha = self.function_alpha(x_k,s_k)
         grad_alpha = self.calculateDifference(func_alpha)
@@ -83,20 +83,22 @@ class Optimizer():
                 Dalpha_0 = min(Dalpha_0, self.xi * (alpha_0 - alpha_L))
                 alpha_L = alpha_0
                 alpha_0 = alpha_0 + Dalpha_0
+#                print(alpha_0)
             else:
 #                print("RC")
                 alpha_U = min(alpha_0, alpha_U)
 #                print("Alpha:")
 #                print(alpha_0)
-                Balpha_0 = (alpha_0 - alpha_L)**2 * grad_alpha(alpha_0) / \
+                Balpha_0 = (alpha_0 - alpha_L)**2 * grad_alpha(alpha_L) / \
                     (2 * (func_alpha(alpha_L) - func_alpha(alpha_0) + (alpha_0 - alpha_L) * grad_alpha(alpha_L)))
                 Balpha_0 = max(Balpha_0[0], alpha_L + self.tau * (alpha_U - alpha_L))
                 Balpha_0 = min(Balpha_0, alpha_U - self.tau * (alpha_U - alpha_L))
                 alpha_0 = Balpha_0
+#                print(alpha_0)
             
             LC,RC = self.goldsteinCondition(alpha_0,alpha_U,alpha_L,func_alpha,grad_alpha)
             
-        return alpha_0
+        return array([alpha_0])
 
     def exactLineSearch(self,x_k,s_k): 
         alpha=1
@@ -118,53 +120,63 @@ class Optimizer():
     def newton(self, x, Inexact=True):
         x=array(x,dtype=float)          
         g=self.fgradient(x)  
+        Gbar=Optimizer.calculateDifference(self.function, True)
+        G=0.5*(Gbar(x)+transpose(Gbar(x)))
         
-        
+        H = inv(G)
+        print("old",H)
         while True:                
             
             gk0=g            
             
-            g=self.fgradient(x) 
-    
-            gk1=g            
+           
           
-            Gbar=Optimizer.calculateDifference(self.function, True) 
+#            Gbar=Optimizer.calculateDifference(self.function, True) 
             
-            G=0.5*(Gbar(x)+transpose(Gbar(x)))
+#            G=0.5*(Gbar(x)+transpose(Gbar(x)))
             
   
-            try:
-                L = cholesky(G)
-            except LinAlgError:
-                print('matrix no psd')
-    
-            y=solve(L,-g)
-            s=solve(L.conj().T,y)
-            
+#            try:
+#                L = cholesky(G)
+#            except LinAlgError:
+#                print('matrix no psd')
+#    
+#            y=solve(L,-g)
+#            s=solve(L.conj().T,y)
+  
+            s = -dot(H,g)
             if Inexact:
                 alpha=self.inexactLineSearch(x,s)
             else:
                 alpha=self.exactLineSearch(x,s)
             
-            xk0=x
-
+            xk0=array(x)
+            print("xk0",xk0)
             for i in range(0, len(x)):
                 x[i]=x[i]+alpha*s[i]
             
-            xk1=x
+            xk1=array(x)
+            print("xk1",xk1)
+            g=self.fgradient(x) 
+    
+            gk1=g             
             
-            H=inv(G)
+#            H=inv(G)
             
             gamma=gk1-gk0
             delta=xk1-xk0
             u=delta-H*gamma
             a=1/(u.T*gamma)
-            
+            print("delta",delta)
+            print("gamma",gamma)
+            print("s",s)
 #            H=H+a*u*u.T
             H = self.updateHess(delta,gamma,H)            
             
-    
-            print(x,alpha)
+            print("H",H)
+            print("x",x)
+            print("alpha",alpha)
+#            print(x,alpha)
             print('normg',norm(g))
             if norm(g) < 1e-5:
                 

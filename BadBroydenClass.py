@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 23 10:31:24 2016
+Created on Fri Sep 23 16:17:13 2016
 
 @author: PeterS
 """
@@ -8,7 +8,7 @@ from scipy import *
 from pylab import *
 
 
-class GoodBroyden(Optimizer):
+class BadBroyden(Optimizer):
     
     @classmethod
     def updateHess(cls,delta,gamma,hessOld):
@@ -18,17 +18,10 @@ class GoodBroyden(Optimizer):
         
         gamma = gamma.reshape(size(gamma),1)
         delta = delta.reshape(size(delta),1)
-#        print("delta",delta)
-        u = array(delta - dot(hessOld,gamma))
-#        print(u)
-        a = 1/(dot(u.T,gamma))
-#        print(a)
-        H = hessOld + a*dot(u,u.T)
-#        print(H)
+        
+        H = hessOld + ((delta - hessOld*gamma)*delta.T*hessOld) \
+        /(delta.T*hessOld*gamma)
+        
+        
+        
         return H
-        
-        
-        
-        
-    
-    
