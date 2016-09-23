@@ -116,7 +116,6 @@ class Optimizer():
             
         
     def newton(self, x, Inexact=True):
-        
         x=array(x,dtype=float)          
         g=self.fgradient(x)  
         
@@ -133,8 +132,7 @@ class Optimizer():
             
             G=0.5*(Gbar(x)+transpose(Gbar(x)))
             
-
-    
+  
             try:
                 L = cholesky(G)
             except LinAlgError:
@@ -154,6 +152,17 @@ class Optimizer():
                 x[i]=x[i]+alpha*s[i]
             
             xk1=x
+            
+            H=inv(G)
+            
+            gamma=gk1-gk0
+            delta=xk1-xk0
+            u=delta-H*gamma
+            a=1/(u.T*gamma)
+            
+#            H=H+a*u*u.T
+            H = self.updateHess(delta,gamma,H)            
+            
     
             print(x,alpha)
             print('normg',norm(g))
