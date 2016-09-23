@@ -17,12 +17,8 @@ class Optimizer():
     @classmethod
     def calculateGradient(cls,function,epsilon = 1e-8):
         def grad(x):
-            if (not isinstance(x,ndarray)) or (not isinstance(x,list)): 
-                point = array([x]) +0.0
-                res = array([x]) +0.0
-            else:
-                point = array(x) +0.0
-                res = array(x) +0.0
+            point = array(x) +0.0
+            res = array(x) +0.0
             
             for i in range(0,len(point)):
                 xf = array(point)
