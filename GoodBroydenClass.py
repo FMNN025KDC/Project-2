@@ -22,7 +22,7 @@ class GoodBroyden(Optimizer):
         u = array(delta - hessOld*gamma)[None]
         a = 1/(u.T*gamma)
         
-        H = hessOld + a*u*u.T
+        H = hessOld + a*u*u.T   # behöver nog använda dot() och outer() här för multiplikationer, även ovanför. gör man det blir dimensionerna rätt men nått annat är fel med algoritmen, divergerar satan i det//kristoffer
         
         return H
         
