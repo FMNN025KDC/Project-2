@@ -16,6 +16,10 @@ def Rosenbrock():
     
     
 func=Rosenbrock()
+'''this point is not PSD after the first step'''
 x0=array([-5,-10])
+'''---------------------------------------'''
+
+
 opt=Optimizer(func)
-opt.newton(x0,False,'GB')
+opt.newton(x0,False,'BFGS')

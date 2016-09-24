@@ -8,6 +8,7 @@ from  scipy import *
 from  pylab import *
 import scipy.optimize as optimize
 import time
+import sys
 
 
 class Optimizer():
@@ -117,8 +118,17 @@ class Optimizer():
             
         
     def newton(self, x, Inexact=True, method='classic'):
+        
+        acceptedMethods=['classic','DFP','GB','BFGS','BB']
+        
+        if not method in acceptedMethods:            
+            print('not acceptable method')            
+            sys.exit()
+            
         x=array(x,dtype=float)          
         g=self.fgradient(x)
+        
+        
         
         if method != 'classic':
             run_once=True
@@ -211,6 +221,12 @@ class Optimizer():
                 
 #                print('H',H,'g',g)
 #                print(shape(H),type(H))
+            elif method =='BFGS':
+                
+                delta=xk1-xk0
+                gam=gk1-gk0
+                H = BFGS.updateHess(delta,gam,H)
+                s=-dot(H,g)                
         
 
                 
