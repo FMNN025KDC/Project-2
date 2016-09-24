@@ -1,14 +1,14 @@
-
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 23 10:31:24 2016
-@author: PeterS
+Created on Sat Sep 24 11:14:08 2016
+@author: poff
 """
-from scipy import *
-from pylab import *
+from  scipy import *
+from  pylab import *
 
 
-class GoodBroyden(Optimizer):
+
+class DFP(Optimizer):
     
     @classmethod
     def updateHess(cls,delta,gam,hessOld):
@@ -20,8 +20,13 @@ class GoodBroyden(Optimizer):
 #        delta = delta.reshape(size(delta),1)
         
         u = delta - dot(hessOld,gam) #1x2 
-#        print('u',u)
+    #    print('u',u)
         a = 1/dot(u.T,gam)    #scalar
-#        print('a',a)
-        H = hessOld + a*outer(u,u.T)
+     #   print('a',a)
+        ggT=outer(gam,gam.T)
+        HggT=dot(hessOld,ggT)
+        gTH=dot(gam.T,hessOld)
+        
+
+        H = hessOld + outer(delta,delta.T)/(dot(delta.T,gam))-dot(HggT,hessOld)/dot(gTH,gam)
         return H

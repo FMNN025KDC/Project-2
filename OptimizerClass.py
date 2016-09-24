@@ -99,8 +99,7 @@ class Optimizer():
         return alpha_0
 
     def exactLineSearch(self,x_k,s_k):
-        print('x_k',x_k)
-        print('s_k',s_k)        
+     
         alpha=1
         alpha_func=self.function_alpha(x_k,s_k)
         alpha=optimize.minimize(alpha_func, alpha)
@@ -120,8 +119,14 @@ class Optimizer():
     def newton(self, x, Inexact=True, method='classic'):
         x=array(x,dtype=float)          
         g=self.fgradient(x)
+        
+        if method != 'classic':
+            run_once=True
+        else:
+            run_once=False
+            methodinput=method
 
-        run_once=True
+
         
         while True:
                             
@@ -135,8 +140,20 @@ class Optimizer():
             Gbar=Optimizer.calculateDifference(self.function, True)             
             G=0.5*(Gbar(x)+transpose(Gbar(x)))
             
-            if method=='classic':
+
+            if method !='classic':
+                
+                if run_once==True:
+                    H=inv(G)
+                    methodinput=method
+                    method='classic'
+                    run_once=False
+
+
             
+            if method=='classic':
+                print('newton')
+
                 try:
                     L = cholesky(G)
                 except LinAlgError:
@@ -146,65 +163,81 @@ class Optimizer():
                 y=solve(L,-g)
                 s=solve(L.conj().T,y)
                 
-            if method !='classic':
-                if run_once==True:
-                    Gbar=Optimizer.calculateDifference(self.function, True)             
-                    G=0.5*(Gbar(x)+transpose(Gbar(x)))
-                    H=inv(G)
+               
+                
+#                if run_once==True:
+#                    Gbar=Optimizer.calculateDifference(self.function, True)             
+#                    G=0.5*(Gbar(x)+transpose(Gbar(x)))
+#                    H=inv(G)
+#
+#                    s=-dot(H,g)
+##                    print('s',s)
+#                    xk0=array(x)
+#                    print('xk0',xk0)
+#                    for i in range(0, len(x)):
+#                        x[i]=x[i]+1*s[i]
+#                    xk1=array(x)
+#                    g=self.fgradient(x)    
+#                    gk1=g       
+#                    print('xk1',xk1)                                      
+#                    run_once=False
+#                    
 
-                    s=-dot(H,g)
-#                    print('s',s)
-                    xk0=array(x)
-                    print('xk0',xk0)
-                    for i in range(0, len(x)):
-                        x[i]=x[i]+1*s[i]
-                    xk1=array(x)
-                    g=self.fgradient(x)    
-                    gk1=g       
-                    print('xk1',xk1)                                      
-                    run_once=False
-                    
-                gam=gk1-gk0
-                print('gamma',gam)                
+#                print('gamma',gam)                
+
+#                print('delta',delta)                
+
+                
+            if method=='GB':  
+
                 delta=xk1-xk0
-                print('delta',delta)                
-
-                
-                if method=='GB':               
-                    H = GoodBroyden.updateHess(delta,gam,H)
-                elif method=='DFP':
-
-                    H = DFP.updateHess(delta,gam,H)
-                    
-                print('H',H,'g',g)
-                print(shape(H),type(H))
+                gam=gk1-gk0
+                H = GoodBroyden.updateHess(delta,gam,H)
                 s=-dot(H,g)
-                print('s',s)
-                print('x',x)
+
+                print('delta',delta,'gamma',gam)
+                
+#                q=0                
+#                if input('type q to break:') == 'q':
+#                    break
+                
+                
+            elif method=='DFP':
+
+                delta=xk1-xk0
+                gam=gk1-gk0
+                H = DFP.updateHess(delta,gam,H)
+                s=-dot(H,g)
+                
+#                print('H',H,'g',g)
+#                print(shape(H),type(H))
+        
+
                 
 
-            time.sleep(5)
+#            time.sleep(5)
                     
             if Inexact:
                 alpha=self.inexactLineSearch(x,s)
             else:
                 alpha=self.exactLineSearch(x,s)
             
-            xk0=x
-
+            xk0=array(x)
+            print('xk0',xk0)
             for i in range(0, len(x)):
                 x[i]=x[i]+alpha*s[i]
             
-            xk1=x
-            
+            xk1=array(x)
+            print('xk1',xk1)
             
             
 
-            
+            if run_once==False:
+                method=methodinput
         
             
             
-            print(x,alpha)
+
             print('normg',norm(g))
             if norm(g) < 1e-5:
                 print('x=',x)
