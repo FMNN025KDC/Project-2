@@ -7,6 +7,7 @@ Created on Fri Sep 23 14:59:40 2016
 from  scipy import *
 from  pylab import *
 import scipy.optimize as optimize
+import time
 
 
 class Optimizer():
@@ -121,6 +122,7 @@ class Optimizer():
         g=self.fgradient(x)
 
         run_once=True
+        
         while True:
                             
             
@@ -144,14 +146,14 @@ class Optimizer():
                 y=solve(L,-g)
                 s=solve(L.conj().T,y)
                 
-            elif method =='GB':
+            if method !='classic':
                 if run_once==True:
                     Gbar=Optimizer.calculateDifference(self.function, True)             
                     G=0.5*(Gbar(x)+transpose(Gbar(x)))
                     H=inv(G)
 
                     s=-dot(H,g)
-                    print('s',s)
+#                    print('s',s)
                     xk0=array(x)
                     print('xk0',xk0)
                     for i in range(0, len(x)):
@@ -162,17 +164,26 @@ class Optimizer():
                     print('xk1',xk1)                                      
                     run_once=False
                     
-                gamma=gk1-gk0
-                print('gamma',gamma)                
+                gam=gk1-gk0
+                print('gamma',gam)                
                 delta=xk1-xk0
-                print('delta',delta)
-                H = GoodBroyden.updateHess(delta,gamma,H)
+                print('delta',delta)                
+
+                
+                if method=='GB':               
+                    H = GoodBroyden.updateHess(delta,gam,H)
+                elif method=='DFP':
+
+                    H = DFP.updateHess(delta,gam,H)
+                    
                 print('H',H,'g',g)
                 print(shape(H),type(H))
                 s=-dot(H,g)
                 print('s',s)
                 print('x',x)
                 
+
+            time.sleep(5)
                     
             if Inexact:
                 alpha=self.inexactLineSearch(x,s)
