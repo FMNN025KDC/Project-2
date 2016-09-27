@@ -83,8 +83,8 @@ class OptimizationMethod():
             # Find new point
             x_k1 = x_k + alpha_k * s_k
             # Some print outs to verify that the code does what it's supposed to.
-            print("-----------------------------------")
-            print("alpha:",alpha_k,"x_k:",x_k,"x_k1:",x_k1,"s_k:",s_k)
+#            print("-----------------------------------")
+#            print("alpha:",alpha_k,"x_k:",x_k,"x_k1:",x_k1,"s_k:",s_k)
             # For plotting how our solver steps when solving Rosenbrock function.
 #            xp.append(x_k[0])
 #            yp.append(x_k[1])
@@ -92,19 +92,19 @@ class OptimizationMethod():
             # Update Hessian.
             G_k = self.updateHessian(x_k, x_k1, G_k)
             x_k = x_k1
-            print("G_k, or H_k for QuasiNewton:")
-            print(G_k)
+#            print("G_k, or H_k for QuasiNewton:")
+#            print(G_k)
             
             # If condition is fulfilled, break while loop.
             if (norm(self.fgradient(x_k)) < tol):
                 break
         
-        print("-----------------------------------")
+#        print("-----------------------------------")
         # For plotting how our solver steps when solving Rosenbrock function.
 #        plot(xp,yp,'--o')
-        print("Found point: ",x_k)
+#        print("Found point: ",x_k)
         f_k = self.function(x_k)
-        print("Function value: ",f_k)
+#        print("Function value: ",f_k)
         return x_k,f_k
       
     def function_alpha(self, x_k, s_k): 

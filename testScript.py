@@ -12,6 +12,7 @@ import chebyquad_problem_NG4oWEq as ch
 import RosenbrockFunction as RB
 import differentiation as df
 import unittest
+import time
 
 
 class TestOptimizer(unittest.TestCase):
@@ -23,15 +24,24 @@ class TestOptimizer(unittest.TestCase):
         x_0 = rand(2)*10
 
         ProblemRB = Op.OptimizationProblem(RB.Rosenbrock(),RB.RosenbrockGradient())
-
+        times=[]
+        methods=[]
         for i in acceptedMethods:
             for j in lineSearchMethods:
                 for k in conditions:
+                    start=time.time()
                     solver = Op.QuasiNewton(ProblemRB,i,condition = k)
                     point,value = solver.newton(x_0,j,1e-8)
                     self.assertAlmostEqual(norm(point - array([1.,1.])), 0)
-         
-
+                    
+                    end=time.time()   
+                    times.append(i+' with '+j+' linesearch '+'using '+k+' condition '+'clocked at '+str(end-start)+' s')
+        
+        print('-------------------Timings---------------------------')
+        for k in times:
+            print(k)
+        print('-----------------------------------------------------')
+                    
     def testChebyquad(self):
         ProblemCQ = Op.OptimizationProblem(ch.Chebyquad(),ch.ChebyquadGradient())
         
@@ -54,7 +64,7 @@ class TestOptimizer(unittest.TestCase):
             sciValue = ch.chebyquad(sciPoint)
             sciPoints.append(sciPoint)
             sciValues.append(sciValue)
-#            self.assertAlmostEqual(norm(sciPoint - optPoint), 0)
+            self.assertAlmostEqual(norm(sciPoint - optPoint), 0,places=1)
             
         for i in range(0,len(optPoints)):
             print("--------------------------")
@@ -66,11 +76,22 @@ class TestOptimizer(unittest.TestCase):
             print("Point: ",sciPoints[i])
             print("Value: ",sciValues[i])
             print("--------------------------")   
+            
 
+    def testDifferentiation(self):
+        x=array([1,1])
+        function=Rosenbrock()
+        functionGrad=getGradient(function)
+        functionHess=getHessian(functionGrad)
+        
+        exactGrad=RosenbrockGradient()
+        exactHess=RosenbrockHessian()
+        assert norm(exactGrad(x)-functionGrad(x)) < 1e-7
+        assert norm(exactHess(x)-functionHess(x)) < 1e-7
+        
 if __name__ == '__main__':
     unittest.main()
-      
-      
+         
  
 #ProblemRB = Op.OptimizationProblem(RB.Rosenbrock(),RB.RosenbrockGradient())
 #

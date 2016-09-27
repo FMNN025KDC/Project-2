@@ -19,3 +19,10 @@ def RosenbrockGradient():
         
         return array([2 * (-1 + x[0] + 200 * x[0]**3 - 200 * x[0] * x[1]), 200 * (-x[0]**2 + x[1])])
     return RBGrad
+    
+def RosenbrockHessian():
+    def RBHess(x):
+        x=array(x)
+        
+        return array([[-400*(x[1]-x[0]**2)+800*x[0]**2+2, -400*x[0]],[-400*x[0], 200]])
+    return RBHess
